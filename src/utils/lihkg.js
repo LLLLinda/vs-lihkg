@@ -10,7 +10,7 @@ function formPageRequest(thread_id, page) {
 /** @param {import("lihkg-api/dist/model").ContentJSON} thread */
 function transformThread({ response: { title, item_data, like_count, dislike_count } }) {
     // main post's like is same as thread's like 
-    const mainPost = item_data.find(x => Number(x.post_id) == 1)
+    const mainPost = item_data.find(x => Number(x.msg_num) == 1)
 
     if (!!mainPost)
         Object.assign(mainPost, { like_count, dislike_count })
