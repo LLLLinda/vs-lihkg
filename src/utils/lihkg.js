@@ -11,29 +11,34 @@ function formPageRequest(thread_id, page) {
 function transformThread({ response: { title, item_data, like_count, dislike_count } }) {
     // main post's like is same as thread's like 
     const mainPost = item_data.find(x => Number(x.msg_num) == 1)
+    const transformRootPost = post => transformPost(post, false)
 
     if (!!mainPost)
         Object.assign(mainPost, { like_count, dislike_count })
     return `
 ${Markdown.Style}
 # ${title}
-${item_data.map(transformPost).join("")}
+${item_data.map(transformRootPost).join("")}
 `
 }
 
 /** @param {import("lihkg-api/dist/model").Post} post  */
-function transformPost({ reply_time, msg, user_nickname, msg_num, like_count, dislike_count }) {
+function transformPost({ reply_time, msg, user_nickname, msg_num, like_count, dislike_count, quote }, isQuoted) {
     const parsedMsg = convertLocalLink(msg)
     const metaInfo = `> ${msg_num} ${user_nickname} ${formatDate(reply_time)}`
-    const comment = `<span>▲${like_count}</span><span>▼${dislike_count}</span>`
-
+    const comment = `<div class="like">
+    <span>▲${like_count}</span><span>▼${dislike_count}</span>
+</div>`
+    let nestedQuote
+    if (quote)
+        nestedQuote = `<div>
+    <blockquote>${transformPost(quote, true)}</blockquote>
+    <br/>
+</div>`
     return `
 ${metaInfo}
-<div class="post">
-    <div class="like">
-        ${comment}
-    </div>
-    <div>
+<div class="post">${!isQuoted ? comment : ""}
+    <div>${nestedQuote || ""}
         ${parsedMsg}
     </div>
 </div>
